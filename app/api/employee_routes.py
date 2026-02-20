@@ -8,6 +8,7 @@ from app.schemas.employee import (
     EmployeeResponse,
     EmployeeUpdate
 )
+from app.services.vacation_service import calculate_seniority_years
 
 router = APIRouter(
     prefix="/employees",
@@ -100,3 +101,21 @@ def delete_employee(employee_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"detail": "Employee deleted"}
+
+@router.get("/{employee_id}/seniority")
+def get_employee_seniority(employee_id: int, db: Session = Depends(get_db)):
+
+    employee = db.query(Employee).filter(
+        Employee.id == employee_id
+    ).first()
+
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+
+    years = calculate_seniority_years(employee)
+
+    return {
+        "employee_id": employee.id,
+        "seniority_years": years
+    }
+

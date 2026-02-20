@@ -6,6 +6,7 @@ from app.database import Base
 from app.models import company, employee, vacation_policy, vacation_calculation
 from app.api.company_routes import router as company_router
 from app.api.employee_routes import router as employee_router
+from app.api.vacation_policy_routes import router as policy_router
 
 app = FastAPI()
 
@@ -20,3 +21,4 @@ app.include_router(employee_router)
 @app.get("/")
 def root():
     return {"message": "Vacation SaaS API running"}
+app.include_router(policy_router)
