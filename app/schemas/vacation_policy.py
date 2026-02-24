@@ -1,17 +1,18 @@
 from pydantic import BaseModel
 
-
 class VacationPolicyBase(BaseModel):
     base_days: int
     max_days: int
     company_id: int
 
 
-class VacationPolicyCreate(VacationPolicyBase):
+class VacationPolicyCreate(BaseModel):
     pass
 
+class VacationPolicyRuleCreate(BaseModel):
+    pass
 
-class VacationPolicyResponse(VacationPolicyBase):
+class VacationPolicyResponse(BaseModel):
     id: int
 
     class Config:

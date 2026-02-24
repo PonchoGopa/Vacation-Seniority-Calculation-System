@@ -119,3 +119,6 @@ def get_employee_seniority(employee_id: int, db: Session = Depends(get_db)):
         "seniority_years": years
     }
 
+@router.get("/{employee_id}/vacation-balance")
+def get_vacation_balance(employee_id: int, db: Session = Depends(get_db)):
+    pass

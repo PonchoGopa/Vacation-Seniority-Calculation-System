@@ -20,9 +20,3 @@ class CompanyResponse(CompanyBase):
 
     class Config:
         from_attributes = True
-
-policy = relationship(
-    "policy",
-    back_populates="company",
-    uselist=False
-)

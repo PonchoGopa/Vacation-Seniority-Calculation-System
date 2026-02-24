@@ -3,10 +3,8 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.vacation_policy import VacationPolicy
 from app.models.company import Company
-from app.schemas.vacation_policy import (
-    VacationPolicyCreate,
-    VacationPolicyResponse
-)
+from app.schemas.vacation_policy import VacationPolicyCreate, VacationPolicyResponse
+
 
 router = APIRouter(
     prefix="/policies",
@@ -44,6 +42,3 @@ def create_policy(policy: VacationPolicyCreate, db: Session = Depends(get_db)):
     return db_policy
 
 
-@router.get("/", response_model=list[VacationPolicyResponse])
-def get_policies(db: Session = Depends(get_db)):
-    return db.query(VacationPolicy).all()

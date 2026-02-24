@@ -13,3 +13,8 @@ class Company(Base):
     employees = relationship("Employee", back_populates="company")
     policies = relationship("VacationPolicy", back_populates="company")
 
+policy = relationship(
+    "policy",
+    back_populates="company",
+    uselist=False
+)
