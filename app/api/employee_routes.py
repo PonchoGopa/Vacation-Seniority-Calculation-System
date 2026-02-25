@@ -121,4 +121,28 @@ def get_employee_seniority(employee_id: int, db: Session = Depends(get_db)):
 
 @router.get("/{employee_id}/vacation-balance")
 def get_vacation_balance(employee_id: int, db: Session = Depends(get_db)):
-    pass
+    employee = db.query(Employee).filter(Employee.id == employee_id).first()
+
+    if not employee:
+        return {"error": "Employee not found"}
+
+    days_used = (
+        db.query(VacationRequest)
+        .filter(
+            VacationRequest.employee_id == employee_id,
+            VacationRequest.status == "approved"
+        )
+        .with_entities(VacationRequest.days_requested)
+        .all()
+    )
+
+    total_days_used = sum(day[0] for day in days_used)
+
+    result = calculate_vacation_balance(
+    employee=employee,
+    policy_rules=employee.vacation_policy.rules,
+    days_used=total_days_used
+)
+
+    return result
+
