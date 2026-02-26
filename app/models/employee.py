@@ -16,3 +16,9 @@ class Employee(Base):
     company = relationship("Company", back_populates="employees")
 
     calculations = relationship("VacationCalculation", back_populates="employee")
+
+    vacation_requests = relationship(
+        "VacationRequest",
+        back_populates="employee",
+        cascade="all, delete-orphan"
+    )
