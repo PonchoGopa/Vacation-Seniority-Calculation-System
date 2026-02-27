@@ -89,11 +89,7 @@ def approve_request(
     db: Session = Depends(get_db)
 ):
     try:
-        updated_request = approve_vacation_request(db, request_id)
-        return {
-            "message": "Vacation request approved successfully",
-            "data": updated_request
-        }
+        return approve_vacation_request(db, request_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

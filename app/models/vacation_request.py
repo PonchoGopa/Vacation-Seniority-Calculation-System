@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, Date, ForeignKey, String, CheckConstraint
+from sqlalchemy import Column, Integer, Date, ForeignKey, String, CheckConstraint, DateTime
+from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -16,6 +17,9 @@ class VacationRequest(Base):
     days_requested = Column(Integer, nullable=False)
 
     status = Column(String(20), nullable=False, default="pending")
+
+    approved_at = Column(DateTime, nullable=True)
+    approved_by = Column(Integer, nullable=True)
 
     employee = relationship("Employee", back_populates="vacation_requests")
 
