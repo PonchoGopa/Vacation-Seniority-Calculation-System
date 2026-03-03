@@ -3,6 +3,8 @@ from app.models.employee import Employee
 from sqlalchemy.orm import Session
 from app.models.vacation_request import VacationRequest
 from app.services.vacation_calculator import calculate_vacation_balance
+from typing import Optional
+from app.models.vacation_status import VacationStatus
 
 
 def calculate_seniority_years(employee: Employee) -> int:
@@ -23,7 +25,7 @@ def approve_vacation_request(db: Session, request_id: int):
     if not request:
         raise ValueError("Request not found")
 
-    if request.status != "pending":
+    if request.status != VacationStatus.pending:
         raise ValueError("Only pending requests can be approved")
 
     employee = db.query(Employee).filter(
@@ -53,13 +55,56 @@ def reject_vacation_request(db: Session, request_id: int):
     if not request:
         raise ValueError("Request not found")
 
-    if request.status != "pending":
+    if request.status != VacationStatus.pending:
         raise ValueError("Only pending requests can be rejected")
 
-    request.status = "rejected"
+    request.status = VacationStatus.rejected
 
     db.commit()
     db.refresh(request)
 
     return request
+
+
+def get_pending_requests(db: Session):
+    return (
+        db.query(VacationRequest)
+        .filter(VacationRequest.status == "pending")
+        .order_by(VacationRequest.start_date.asc())
+        .all()
+    )
+
+def cancel_vacation_request(db: Session, request_id: int):
+    request = db.query(VacationRequest).filter(
+        VacationRequest.id == request_id
+    ).first()
+
+    if not request:
+        raise ValueError("Request not found")
+
+    if request.status != VacationStatus.pending:
+        raise ValueError("Only pending requests can be cancelled")
+
+    request.status = VacationStatus.cancelled
+
+    db.commit()
+    db.refresh(request)
+
+    return request
+
+def get_requests_by_employee(
+    db: Session,
+    employee_id: int,
+    status: Optional[str] = None
+):
+    query = db.query(VacationRequest).filter(
+        VacationRequest.employee_id == employee_id
+    )
+
+    if status:
+        query = query.filter(VacationRequest.status == status)
+
+    return query.order_by(
+        VacationRequest.start_date.desc()
+    ).all()
 

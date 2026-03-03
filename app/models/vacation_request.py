@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, Date, ForeignKey, String, CheckConstraint, DateTime
-from sqlalchemy.sql import func
+from sqlalchemy import Column, Integer, Date, ForeignKey, CheckConstraint, DateTime, Enum
 from sqlalchemy.orm import relationship
 from app.database import Base
+from app.models.vacation_status import VacationStatus
 
 
 class VacationRequest(Base):
@@ -16,7 +16,11 @@ class VacationRequest(Base):
 
     days_requested = Column(Integer, nullable=False)
 
-    status = Column(String(20), nullable=False, default="pending")
+    status = Column(
+        Enum(VacationStatus),
+        default=VacationStatus.pending,
+        nullable=False
+    )
 
     approved_at = Column(DateTime, nullable=True)
     approved_by = Column(Integer, nullable=True)

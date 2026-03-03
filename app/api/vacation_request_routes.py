@@ -6,6 +6,7 @@ from app.models.employee import Employee
 from app.services.date_utils import calculate_business_days
 from app.services.vacation_calculator import calculate_vacation_balance
 from app.services.vacation_service import approve_vacation_request
+from typing import Optional
 
 router = APIRouter(prefix="/vacation-requests", tags=["Vacation Requests"])
 
@@ -106,3 +107,29 @@ def reject_request(
         }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/pending")
+def list_pending_requests(db: Session = Depends(get_db)):
+    return get_pending_requests(db)
+
+@router.patch("/{request_id}/cancel")
+def cancel_request(
+    request_id: int,
+    db: Session = Depends(get_db)
+):
+    try:
+        return cancel_vacation_request(db, request_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/employee/{employee_id}")
+def list_requests_by_employee(
+    employee_id: int,
+    status: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    return get_requests_by_employee(
+        db=db,
+        employee_id=employee_id,
+        status=status
+    )
