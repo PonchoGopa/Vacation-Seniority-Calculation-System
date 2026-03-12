@@ -7,6 +7,7 @@ from app.services.date_utils import calculate_business_days
 from app.services.vacation_calculator import calculate_vacation_balance
 from app.services.vacation_service import approve_vacation_request
 from typing import Optional
+from app.models.vacation_status import VacationStatus
 
 router = APIRouter(prefix="/vacation-requests", tags=["Vacation Requests"])
 
@@ -87,10 +88,11 @@ def create_vacation_request(
 @router.patch("/{request_id}/approve")
 def approve_request(
     request_id: int,
+    actor_id: int,
     db: Session = Depends(get_db)
 ):
     try:
-        return approve_vacation_request(db, request_id)
+        return approve_vacation_request(db, request_id, actor_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -125,7 +127,7 @@ def cancel_request(
 @router.get("/employee/{employee_id}")
 def list_requests_by_employee(
     employee_id: int,
-    status: Optional[str] = None,
+    status: Optional[VacationStatus] = None,
     db: Session = Depends(get_db)
 ):
     return get_requests_by_employee(

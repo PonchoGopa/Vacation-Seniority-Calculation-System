@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, Date, ForeignKey, CheckConstraint, DateT
 from sqlalchemy.orm import relationship
 from app.database import Base
 from app.models.vacation_status import VacationStatus
+from datetime import datetime
 
 
 class VacationRequest(Base):
@@ -24,6 +25,12 @@ class VacationRequest(Base):
 
     approved_at = Column(DateTime, nullable=True)
     approved_by = Column(Integer, nullable=True)
+
+    rejected_at = Column(DateTime, nullable=True)
+    rejected_by = Column(Integer, nullable=True)
+
+    cancelled_at = Column(DateTime, nullable=True)
+    cancelled_by = Column(Integer, nullable=True)
 
     employee = relationship("Employee", back_populates="vacation_requests")
 

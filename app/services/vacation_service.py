@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from app.models.employee import Employee
 from sqlalchemy.orm import Session
 from app.models.vacation_request import VacationRequest
@@ -17,7 +17,7 @@ def calculate_seniority_years(employee: Employee) -> int:
 
     return max(years, 0)
 
-def approve_vacation_request(db: Session, request_id: int):
+def approve_vacation_request(db: Session, request_id: int, actor_id: int):
     request = db.query(VacationRequest).filter(
         VacationRequest.id == request_id
     ).first()
@@ -28,26 +28,17 @@ def approve_vacation_request(db: Session, request_id: int):
     if request.status != VacationStatus.pending:
         raise ValueError("Only pending requests can be approved")
 
-    employee = db.query(Employee).filter(
-        Employee.id == request.employee_id
-    ).first()
-
-    # 🔎 Calcular balance actual
-    balance_data = calculate_vacation_balance(db, employee.id)
-    remaining_balance = balance_data["remaining_balance"]
-
-    if request.days_requested > remaining_balance:
-        raise ValueError("Insufficient vacation balance at approval time")
-
-    request.status = "approved"
+    request.status = VacationStatus.approved
     request.approved_at = datetime.utcnow()
+    request.approved_by = actor_id
 
     db.commit()
     db.refresh(request)
 
     return request
 
-def reject_vacation_request(db: Session, request_id: int):
+def reject_vacation_request(db: Session, request_id: int, actor_id: int):
+
     request = db.query(VacationRequest).filter(
         VacationRequest.id == request_id
     ).first()
@@ -59,6 +50,8 @@ def reject_vacation_request(db: Session, request_id: int):
         raise ValueError("Only pending requests can be rejected")
 
     request.status = VacationStatus.rejected
+    request.rejected_at = datetime.utcnow()
+    request.rejected_by = actor_id
 
     db.commit()
     db.refresh(request)
@@ -74,7 +67,8 @@ def get_pending_requests(db: Session):
         .all()
     )
 
-def cancel_vacation_request(db: Session, request_id: int):
+def cancel_vacation_request(db: Session, request_id: int, actor_id: int):
+
     request = db.query(VacationRequest).filter(
         VacationRequest.id == request_id
     ).first()
@@ -86,6 +80,8 @@ def cancel_vacation_request(db: Session, request_id: int):
         raise ValueError("Only pending requests can be cancelled")
 
     request.status = VacationStatus.cancelled
+    request.cancelled_at = datetime.utcnow()
+    request.cancelled_by = actor_id
 
     db.commit()
     db.refresh(request)
