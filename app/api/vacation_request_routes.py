@@ -5,7 +5,13 @@ from app.models.vacation_request import VacationRequest
 from app.models.employee import Employee
 from app.services.date_utils import calculate_business_days
 from app.services.vacation_calculator import calculate_vacation_balance
-from app.services.vacation_service import approve_vacation_request
+from app.services.vacation_service import (
+    approve_vacation_request,
+    reject_vacation_request,
+    cancel_vacation_request,
+    get_pending_requests,
+    get_requests_by_employee
+)
 from typing import Optional
 from app.models.vacation_status import VacationStatus
 
@@ -19,7 +25,6 @@ def create_vacation_request(
     end_date,
     db: Session = Depends(get_db)
 ):
-
     employee = db.query(Employee).filter(Employee.id == employee_id).first()
     if not employee:
         raise HTTPException(status_code=404, detail="Employee not found")
@@ -40,9 +45,9 @@ def create_vacation_request(
             status_code=400,
             detail="Vacation request overlaps with an existing request"
         )
+
     days_requested = calculate_business_days(start_date, end_date)
 
-    # Obtener días ya usados (solo approved)
     approved_requests = (
         db.query(VacationRequest)
         .filter(
@@ -54,7 +59,6 @@ def create_vacation_request(
 
     total_days_used = sum(req.days_requested for req in approved_requests)
 
-    # Calcular balance actual
     balance = calculate_vacation_balance(
         employee=employee,
         policy_rules=employee.vacation_policy.rules,
@@ -63,14 +67,12 @@ def create_vacation_request(
 
     remaining_balance = balance["remaining_balance"]
 
-    # Validar que no exceda
     if days_requested > remaining_balance:
         raise HTTPException(
             status_code=400,
             detail=f"Request exceeds available balance. Available: {remaining_balance} days"
         )
 
-    # Crear solicitud
     new_request = VacationRequest(
         employee_id=employee_id,
         start_date=start_date,
@@ -85,6 +87,7 @@ def create_vacation_request(
 
     return new_request
 
+
 @router.patch("/{request_id}/approve")
 def approve_request(
     request_id: int,
@@ -96,45 +99,30 @@ def approve_request(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @router.patch("/{request_id}/reject")
 def reject_request(
     request_id: int,
+    actor_id: int,
     db: Session = Depends(get_db)
 ):
     try:
-        updated_request = reject_vacation_request(db, request_id)
-        return {
-            "message": "Vacation request rejected successfully",
-            "data": updated_request
-        }
+        return reject_vacation_request(db, request_id, actor_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/pending")
-def list_pending_requests(db: Session = Depends(get_db)):
-    return get_pending_requests(db)
 
 @router.patch("/{request_id}/cancel")
 def cancel_request(
     request_id: int,
+    actor_id: int,
     db: Session = Depends(get_db)
 ):
     try:
-        return cancel_vacation_request(db, request_id)
+        return cancel_vacation_request(db, request_id, actor_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/employee/{employee_id}")
-def list_requests_by_employee(
-    employee_id: int,
-    status: Optional[VacationStatus] = None,
-    db: Session = Depends(get_db)
-):
-    return get_requests_by_employee(
-        db=db,
-        employee_id=employee_id,
-        status=status
-    )
 
 @router.get("/pending")
 def list_pending_requests(
@@ -143,6 +131,7 @@ def list_pending_requests(
     db: Session = Depends(get_db)
 ):
     return get_pending_requests(db, skip=skip, limit=limit)
+
 
 @router.get("/employee/{employee_id}")
 def list_requests_by_employee(

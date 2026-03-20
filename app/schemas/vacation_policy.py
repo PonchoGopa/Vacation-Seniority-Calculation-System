@@ -1,19 +1,32 @@
 from pydantic import BaseModel
+from typing import List
 
-class VacationPolicyBase(BaseModel):
-    base_days: int
-    max_days: int
-    company_id: int
+
+class VacationPolicyRuleCreate(BaseModel):
+    years_required: int
+    vacation_days: int
+
+
+class VacationPolicyRuleResponse(BaseModel):
+    id: int
+    years_required: int
+    vacation_days: int
+
+    class Config:
+        from_attributes = True
 
 
 class VacationPolicyCreate(BaseModel):
-    pass
+    company_id: int
+    name: str
+    rules: List[VacationPolicyRuleCreate]
 
-class VacationPolicyRuleCreate(BaseModel):
-    pass
 
 class VacationPolicyResponse(BaseModel):
     id: int
+    name: str
+    company_id: int
+    rules: List[VacationPolicyRuleResponse]
 
     class Config:
         from_attributes = True

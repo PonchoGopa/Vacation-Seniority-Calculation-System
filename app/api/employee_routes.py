@@ -3,12 +3,14 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.employee import Employee
 from app.models.company import Company
+from app.models.vacation_request import VacationRequest
 from app.schemas.employee import (
     EmployeeCreate,
     EmployeeResponse,
     EmployeeUpdate
 )
 from app.services.vacation_service import calculate_seniority_years
+from app.services.vacation_calculator import calculate_vacation_balance
 
 router = APIRouter(
     prefix="/employees",
