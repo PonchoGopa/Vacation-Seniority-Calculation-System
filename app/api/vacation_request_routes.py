@@ -135,3 +135,28 @@ def list_requests_by_employee(
         employee_id=employee_id,
         status=status
     )
+
+@router.get("/pending")
+def list_pending_requests(
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_db)
+):
+    return get_pending_requests(db, skip=skip, limit=limit)
+
+@router.get("/employee/{employee_id}")
+def list_requests_by_employee(
+    employee_id: int,
+    status: Optional[VacationStatus] = None,
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_db)
+):
+    return get_requests_by_employee(
+        db=db,
+        employee_id=employee_id,
+        status=status,
+        skip=skip,
+        limit=limit
+    )
+

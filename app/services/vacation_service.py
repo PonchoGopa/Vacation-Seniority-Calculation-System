@@ -104,3 +104,45 @@ def get_requests_by_employee(
         VacationRequest.start_date.desc()
     ).all()
 
+def get_pending_requests(db: Session, skip: int = 0, limit: int = 10):
+    query = db.query(VacationRequest).filter(
+        VacationRequest.status == VacationStatus.pending
+    )
+
+    total = query.count()
+
+    data = (
+        query.order_by(VacationRequest.start_date.asc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+    return {
+        "total": total,
+        "skip": skip,
+        "limit": limit,
+        "data": data
+    }
+
+def get_requests_by_employee(
+    db: Session,
+    employee_id: int,
+    status: Optional[VacationStatus] = None,
+    skip: int = 0,
+    limit: int = 10
+):
+    query = db.query(VacationRequest).filter(
+        VacationRequest.employee_id == employee_id
+    )
+
+    if status:
+        query = query.filter(VacationRequest.status == status)
+
+    return (
+        query.order_by(VacationRequest.start_date.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
