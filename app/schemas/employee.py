@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Optional
 from pydantic import BaseModel, Field
 
 
@@ -7,6 +8,7 @@ class EmployeeBase(BaseModel):
     hire_date: date
     daily_salary: float
     company_id: int
+    vacation_policy_id: Optional[int] = None
 
 
 class EmployeeCreate(EmployeeBase):
@@ -14,9 +16,10 @@ class EmployeeCreate(EmployeeBase):
 
 
 class EmployeeUpdate(BaseModel):
-    name: str | None = None
-    hire_date: date | None = None
-    daily_salary: float | None = None
+    name: Optional[str] = None
+    hire_date: Optional[date] = None
+    daily_salary: Optional[float] = None
+    vacation_policy_id: Optional[int] = None
 
 
 class EmployeeResponse(EmployeeBase):

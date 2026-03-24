@@ -1,5 +1,5 @@
 from datetime import date
-from sqlalchemy import ForeignKey, Date, Float, String
+from sqlalchemy import ForeignKey, Date, Float, String, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
@@ -14,6 +14,12 @@ class Employee(Base):
 
     company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
     company = relationship("Company", back_populates="employees")
+
+    vacation_policy_id: Mapped[int] = mapped_column(
+        ForeignKey("vacation_policies.id"),
+        nullable=True
+    )
+    vacation_policy = relationship("VacationPolicy")
 
     calculations = relationship("VacationCalculation", back_populates="employee")
 
