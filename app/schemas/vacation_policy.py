@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List
 
 
@@ -12,8 +12,7 @@ class VacationPolicyRuleResponse(BaseModel):
     years_required: int
     vacation_days: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class VacationPolicyCreate(BaseModel):
@@ -28,5 +27,4 @@ class VacationPolicyResponse(BaseModel):
     company_id: int
     rules: List[VacationPolicyRuleResponse]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

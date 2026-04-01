@@ -2,16 +2,20 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from app.main import app
 from app.database import Base, get_db
 
-# Base de datos en memoria solo para tests
+from app.models import company, employee, vacation_policy, vacation_calculation
+from app.models import vacation_policy_rule, vacation_request
+
 TEST_DATABASE_URL = "sqlite:///:memory:"
 
 engine = create_engine(
     TEST_DATABASE_URL,
-    connect_args={"check_same_thread": False}
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool  # Fuerza una sola conexión compartida
 )
 
 TestingSessionLocal = sessionmaker(
@@ -29,24 +33,17 @@ def override_get_db():
         db.close()
 
 
-# Fixture principal — crea y destruye las tablas por cada test
-@pytest.fixture(autouse=True)
-def setup_db():
-    Base.metadata.create_all(bind=engine)
-    yield
-    Base.metadata.drop_all(bind=engine)
-
-
-# Fixture del cliente HTTP
 @pytest.fixture
 def client():
+    Base.metadata.create_all(bind=engine)
     app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as c:
+
+    with TestClient(app, raise_server_exceptions=True) as c:
         yield c
+
     app.dependency_overrides.clear()
+    Base.metadata.drop_all(bind=engine)
 
-
-# Fixtures de datos base reutilizables en todos los tests
 
 @pytest.fixture
 def company(client):

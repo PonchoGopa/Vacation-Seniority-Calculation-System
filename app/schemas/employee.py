@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class EmployeeBase(BaseModel):
@@ -25,5 +25,4 @@ class EmployeeUpdate(BaseModel):
 class EmployeeResponse(EmployeeBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

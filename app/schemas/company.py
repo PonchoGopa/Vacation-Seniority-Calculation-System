@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-
+from pydantic import ConfigDict
 
 class CompanyBase(BaseModel):
     name: str = Field(..., max_length=100)
@@ -17,6 +17,4 @@ class CompanyUpdate(BaseModel):
 
 class CompanyResponse(CompanyBase):
     id: int
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
