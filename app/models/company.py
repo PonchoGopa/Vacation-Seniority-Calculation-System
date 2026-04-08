@@ -12,9 +12,3 @@ class Company(Base):
 
     employees = relationship("Employee", back_populates="company")
     policies = relationship("VacationPolicy", back_populates="company")
-    policy = relationship(
-        "VacationPolicy",
-        back_populates="company",
-        uselist=False,
-        overlaps="policies"
-    )
