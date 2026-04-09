@@ -95,7 +95,7 @@ This API allows companies to manage their employees' vacation entitlements end-t
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/vacation-saas-api.git
+git clone https://github.com/PonchoGopa/vacation-saas-api.git
 cd vacation-saas-api
 ```
 

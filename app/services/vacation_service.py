@@ -11,11 +11,11 @@ def calculate_seniority_years(employee: Employee) -> int:
     today = date.today()
     years = today.year - employee.hire_date.year
 
-    # Ajuste si aún no cumple aniversario este año
     if (today.month, today.day) < (employee.hire_date.month, employee.hire_date.day):
         years -= 1
 
     return max(years, 0)
+
 
 def approve_vacation_request(db: Session, request_id: int, actor_id: int):
     request = db.query(VacationRequest).filter(
@@ -37,8 +37,8 @@ def approve_vacation_request(db: Session, request_id: int, actor_id: int):
 
     return request
 
-def reject_vacation_request(db: Session, request_id: int, actor_id: int):
 
+def reject_vacation_request(db: Session, request_id: int, actor_id: int):
     request = db.query(VacationRequest).filter(
         VacationRequest.id == request_id
     ).first()
@@ -59,16 +59,7 @@ def reject_vacation_request(db: Session, request_id: int, actor_id: int):
     return request
 
 
-def get_pending_requests(db: Session):
-    return (
-        db.query(VacationRequest)
-        .filter(VacationRequest.status == "pending")
-        .order_by(VacationRequest.start_date.asc())
-        .all()
-    )
-
 def cancel_vacation_request(db: Session, request_id: int, actor_id: int):
-
     request = db.query(VacationRequest).filter(
         VacationRequest.id == request_id
     ).first()
@@ -88,21 +79,6 @@ def cancel_vacation_request(db: Session, request_id: int, actor_id: int):
 
     return request
 
-def get_requests_by_employee(
-    db: Session,
-    employee_id: int,
-    status: Optional[str] = None
-):
-    query = db.query(VacationRequest).filter(
-        VacationRequest.employee_id == employee_id
-    )
-
-    if status:
-        query = query.filter(VacationRequest.status == status)
-
-    return query.order_by(
-        VacationRequest.start_date.desc()
-    ).all()
 
 def get_pending_requests(db: Session, skip: int = 0, limit: int = 10):
     query = db.query(VacationRequest).filter(
@@ -124,6 +100,7 @@ def get_pending_requests(db: Session, skip: int = 0, limit: int = 10):
         "limit": limit,
         "data": data
     }
+
 
 def get_requests_by_employee(
     db: Session,
